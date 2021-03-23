@@ -10,6 +10,24 @@
 ### 모델 설명
 인스타그램에 대해 본인이 작성한 모델들에 대한 설명과 모델 간의 관계 등을 적어주세요!
 
+< 모델 빌딩>
+
+
+* 인스타그램을 사용자 및 포스팅 기준으로 분석
+
+
+
+<img width="400" alt="inst_model_1" src="https://user-images.githubusercontent.com/57395765/112103234-ce066380-8bec-11eb-8c66-3bce6d7c905b.png">
+<img width="390" alt="inst_model_2" src="https://user-images.githubusercontent.com/57395765/112103255-d52d7180-8bec-11eb-9fd3-b6435505c96a.png">
+
+* 데이터 모델 다이어그램
+
+<img width="400" src="https://user-images.githubusercontent.com/57395765/112107489-55a2a100-8bf2-11eb-9204-0b2724f8af82.png">
+
+
+<모델 구현>
+
+
 ### ORM 적용해보기
 shell에서 작성한 코드와 그 결과를 보여주세요!
 
