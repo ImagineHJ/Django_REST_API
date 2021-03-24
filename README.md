@@ -33,60 +33,87 @@
 
 <모델 구현>
 
-공식문서 참조 :https://docs.djangoproject.com/ko/3.0/ref/models/fields
+Field 관련 공식문서 참조 : https://docs.djangoproject.com/ko/3.0/ref/models/fields
 
 1. User
-```class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    website = models.TextField(max_length=10)
-    bio = models.TextField()
+```
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
+    website = models.TextField(max_length=100, blank=True)
+    bio = models.TextField(max_length=500, blank=True)
     profile_img = models.ImageField(blank=True)
     post_num = models.IntegerField()
     follower_num = models.IntegerField()
     following_num = models.IntegerField()
-```
 
-2.
+    def __str__(self):
+        return self.user.username
 ```
-class Follow(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    follower_user_id = models.ForeignKey(Profile, on_delete=models.CASCADE)
+* User Model 관련 공식 문서 참조 : https://docs.djangoproject.com/en/3.1/ref/contrib/auth/
+* Django의 User Model에는 username, first_name, last_name, email, password, groups, last_login, date_joined ...등 필드 지원  
+
+
+2. Follow
+```
+class Follow(models.Model):  # profile follows followed_user_id
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="following")
+    followed_user_id = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="followers")
     followed_date = models.DateTimeField(auto_now_add=True)
-```
 
-3.
+    def __str__(self):
+        return '{} followed {}'.format(self.profile.user.username, self.follower_user_id.user.username)
+```
+* 다른 방: ManyToMany Relation으로 User에 follower, following field 추가
+
+
+3. Post
 ```
 class Post(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
-    text = models.TextField()
+    text = models.TextField(max_length=500, blank=True)
     like_num = models.IntegerField()
     comment_num = models.IntegerField()
     media_num = models.IntegerField()
+
+    def __str__(self):
+        return 'post: {} by {}'.format(self.text, self.profile.user.username)
 ```
 
+4. Media
 ```
 class Media(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
+    media_num = models.IntegerField()  # num of media in the post 1~10
     media_file = models.FileField()
-    is_video = models.BooleanField()
+    is_video = models.BooleanField()  # file can be either img or vid
+
+    def __str__(self):
+        return '{}th media of post: {}'.format(self.media_num, self.post.text)
 
 ```
-
+5. Comment
 ```
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="comments")
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
-    text = models.TextField()
-```
+    text = models.TextField(max_length=500, blank=True)
 
+    def __str__(self):
+        return 'comment: {} on post: {} by {}'.format(self.text, self.post.text, self.profile.user.username)
+```
+6. Like
 ```
 class Like(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="likes")
+    like_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'like on post: {} by {}'.format(self.post.text, self.profile.user.username)
 ```
 
 
