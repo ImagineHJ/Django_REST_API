@@ -36,7 +36,7 @@
 Field 관련 공식문서 참조 : https://docs.djangoproject.com/ko/3.0/ref/models/fields
 
 1. User
-```
+```python
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
     website = models.TextField(max_length=100, blank=True)
@@ -51,50 +51,62 @@ class Profile(models.Model):
 ```
 * User Model 관련 공식 문서 참조 : https://docs.djangoproject.com/en/3.1/ref/contrib/auth/
 * Django의 User Model에는 username, first_name, last_name, email, password, groups, last_login, date_joined ...등 필드 지원  
-
+* User에서 제공하는 필드 이외에 필요한 필드 작성
 
 2. Follow
-```
+```python
 class Follow(models.Model):  # profile follows followed_user_id
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="following")
     followed_user_id = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="followers")
     followed_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} followed {}'.format(self.profile.user.username, self.follower_user_id.user.username)
+        return '{} followed {}'.format(self.profile.user.username, self.followed_user_id.user.username)
 ```
-* 다른 방: ManyToMany Relation으로 User에 follower, following field 추가
+* 한 유저가 다른 유저를 팔로우하는 것을 모델화, FK 사용 
+* related_name : profile에서 쉽게 역참조 가능
+* __str__(): 문자열 포맷팅 사용으로 누가 누구를 팔로우 하는지 표현 
+* 다른 방법 : ManyToMany Relation으로 User에 follower, following field 추가
+
 
 
 3. Post
-```
+```python
 class Post(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
     text = models.TextField(max_length=500, blank=True)
-    like_num = models.IntegerField()
-    comment_num = models.IntegerField()
-    media_num = models.IntegerField()
+    like_num = models.IntegerField(default=0)
+    comment_num = models.IntegerField(default=0)
+    media_num = models.IntegerField(default=1)  # at least one media
+    
+    # Add (a post requires at least one media)
+    media_file = models.FileField()  # first media
+    is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
         return 'post: {} by {}'.format(self.text, self.profile.user.username)
 ```
+* 최소 하나의 사진/영상이 있어야 하기 때문에 대표 미디어 파일 포함 
+* str(): 포스팅 텍스트와 사용자를 표현
 
 4. Media
-```
+```python
 class Media(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
-    media_num = models.IntegerField()  # num of media in the post 1~10
+    media_num = models.IntegerField()  # num of media in the post 2~10
     media_file = models.FileField()
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
         return '{}th media of post: {}'.format(self.media_num, self.post.text)
+```
+* 한 포스팅에는 최대 10개의 사진/영상이 업로드, FK사용 -> 개수 제한을 어떻게 할
+* 기본 미디어 이외에 추가적인 미디어를 업로드할 때 사용 
 
-```
 5. Comment
-```
+```python
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="comments")
@@ -105,8 +117,11 @@ class Comment(models.Model):
     def __str__(self):
         return 'comment: {} on post: {} by {}'.format(self.text, self.post.text, self.profile.user.username)
 ```
+* 한 포스팅에 여러개의 댓글 존재, FK 사용
+* 한 유저가 여러개의 댓글 게시 가능, FK 사용 
+
 6. Like
-```
+```python
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="likes")
@@ -115,7 +130,8 @@ class Like(models.Model):
     def __str__(self):
         return 'like on post: {} by {}'.format(self.post.text, self.profile.user.username)
 ```
-
+* 한 포스팅에 여러개의 좋아요 존재, FK 사용
+* 한 유저가 여러개의 좋아요 가능, FK 사용
 
 ### ORM 적용해보기
 shell에서 작성한 코드와 그 결과를 보여주세요!

@@ -25,7 +25,7 @@ class Follow(models.Model):  # profile follows followed_user_id
     followed_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} followed {}'.format(self.profile.user.username, self.follower_user_id.user.username)
+        return '{} followed {}'.format(self.profile.user.username, self.followed_user_id.user.username)
 
 
 class Post(models.Model):
@@ -35,7 +35,11 @@ class Post(models.Model):
     text = models.TextField(max_length=500, blank=True)
     like_num = models.IntegerField(default=0)
     comment_num = models.IntegerField(default=0)
-    media_num = models.IntegerField()  # at least one media
+    media_num = models.IntegerField(default=1)  # at least one media
+
+    # Add (a post requires at least one media)
+    media_file = models.FileField()  # first media
+    is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
         return 'post: {} by {}'.format(self.text, self.profile.user.username)
@@ -43,7 +47,7 @@ class Post(models.Model):
 
 class Media(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
-    media_num = models.IntegerField()  # num of media in the post 1~10
+    media_num = models.IntegerField()  # num of media in the post 12~10
     media_file = models.FileField()
     is_video = models.BooleanField()  # file can be either img or vid
 
