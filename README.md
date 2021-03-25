@@ -67,6 +67,7 @@ class Follow(models.Model):  # profile follows followed_user_id
 * related_name : profile에서 쉽게 역참조 가능
 * __str__(): 문자열 포맷팅 사용으로 누가 누구를 팔로우 하는지 표현 
 * 다른 방법 : ManyToMany Relation으로 User에 follower, following field 추가
+Q: 두 방법의 차이점과, 장단점, 어느 방법이 많이 쓰이는지 궁금합니다.
 
 
 
@@ -102,8 +103,14 @@ class Media(models.Model):
     def __str__(self):
         return '{}th media of post: {}'.format(self.media_num, self.post.text)
 ```
-* 한 포스팅에는 최대 10개의 사진/영상이 업로드, FK사용 -> 개수 제한을 어떻게 할
+* 한 포스팅에는 최대 10개의 사진/영상이 업로드, FK사용 
 * 기본 미디어 이외에 추가적인 미디어를 업로드할 때 사용 
+* Q: 한 포스팅에는 최소 1개 최대 10개의 사진/영상이 존재할 수 있다. 
+  최소조건을 구현하기 위해 Post 모델에 미디어 파일을 추가했는데,
+  이 방법이 최선의 방법인지, 다른 방법이 있을까..?
+  또한 최대 9개의 미디어만이 한 포스팅에 존재할 수 있는데, FK의 개수를 제한할 수 있는 방법은 무엇일까,,,
+* Q: 미디어 파일이 사진인지 영상인지를 구분하기 위해 boolean 필드를 사용했는데, 필요한 작업인지..?
+   (필요할 거 같아서 추가한거긴 하지만 확실하지 않아서,,) 그냥 FileField만 있으면 충분한지...
 
 #### 5. Comment
 ```python
@@ -142,9 +149,37 @@ class Like(models.Model):
 * ```python manage.py makemigrations api```
   
 * ```python manage.py migrate```
+<img width="800" alt="migration" src="https://user-images.githubusercontent.com/57395765/112435881-aa782000-8d88-11eb-9a0c-a38659467cf8.png">
 
 ### ORM 적용해보기
 shell에서 작성한 코드와 그 결과를 보여주세요!
+* user 생성 및 profile 생성 : username이 'user1'이고 이름이 'John Kim'인 사용자 생성 <br></br>
+<img width="645" alt="create user" src="https://user-images.githubusercontent.com/57395765/112436066-e7441700-8d88-11eb-81f3-0eedfe6c57fa.png">
+
+
+* user1의 게시물 3개 생성<br><br>
+  * "This is the picture of me with my pet dog" (사진)<br></br>
+  * "An old family picture of my childhodd" (영상) <br></br>
+  * "I went to DisneyLand! Miss those times...:(" (사진)<br></br>
+<img width="904" alt="create posts" src="https://user-images.githubusercontent.com/57395765/112436074-e8754400-8d88-11eb-8443-3ad86ae82ec0.png">
+
+
+* filter를 사용해 게시물 조회 <br></br>
+  * 사진만 올라간 게시물 : ```Post.objects.filter(is_video=False)```<br></br>
+  * user1이 작성한 게시물 : ```Post.objects.filter(profile__user__username="user1")```<br></br>
+  * 설명이 "This is"로 시작하는 게시물 : ```Post.objects.filter(text__startswith='This is')```<br></br>
+<img width="896" alt="filter1" src="https://user-images.githubusercontent.com/57395765/112436076-e90dda80-8d88-11eb-97b3-54afce98d50e.png">
+<img width="898" alt="filter2" src="https://user-images.githubusercontent.com/57395765/112436077-e90dda80-8d88-11eb-973a-1ba5ad12ea6e.png">
 
 ### 간단한 회고
-과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
+첫 주차 보다 Django가 어떤 시스템으로 돌아가는지 알 수 있었고, 
+특히 데이터 모델링 관련한 경험을 할 수 있어서 좋았다. 단순히 필요한 데이터를 저장하는게 아니라, 
+이를 효율적으로 구성하고 관리할 수 있도록 모델링하는 과정이 흥미로우면서 어려웠다. 아직 다양한 Django 코드를
+볼 기회가 많지 않아서, 모델링하면서도 나의 모델링 방식이 효율적인건지 더 좋은 대안이 있는지 궁금했다.
+모델링 전 다이어그램을 작성한 것은 데이터를 구성하는데 정말 도움이 됐고, 코드를 작성할 때도 편했다. 
+직접 SQL를 사용하지 않고 모델링 및 마이그레이션을 통해 데이터 베이스 테이블을 생성하고 Django ORM으로 데이터를 생성할 수 있어서 편했다. 
+
+추가로 공부할 것
+
+* 좋은 프로그래머들이 작성한 다양한 데이터 모델링 코드를 본다.
+* 헷갈리는 Relation 개에 대해 추가 공부를 한다.
