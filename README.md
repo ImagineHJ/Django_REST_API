@@ -35,7 +35,7 @@
 
 Field 관련 공식문서 참조 : https://docs.djangoproject.com/ko/3.0/ref/models/fields
 
-1. User
+#### 1. User
 ```python
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
@@ -53,7 +53,7 @@ class Profile(models.Model):
 * Django의 User Model에는 username, first_name, last_name, email, password, groups, last_login, date_joined ...등 필드 지원  
 * User에서 제공하는 필드 이외에 필요한 필드 작성
 
-2. Follow
+#### 2. Follow
 ```python
 class Follow(models.Model):  # profile follows followed_user_id
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="following")
@@ -70,7 +70,7 @@ class Follow(models.Model):  # profile follows followed_user_id
 
 
 
-3. Post
+#### 3. Post
 ```python
 class Post(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
@@ -91,7 +91,7 @@ class Post(models.Model):
 * 최소 하나의 사진/영상이 있어야 하기 때문에 대표 미디어 파일 포함 
 * str(): 포스팅 텍스트와 사용자를 표현
 
-4. Media
+#### 4. Media
 ```python
 class Media(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
@@ -105,7 +105,7 @@ class Media(models.Model):
 * 한 포스팅에는 최대 10개의 사진/영상이 업로드, FK사용 -> 개수 제한을 어떻게 할
 * 기본 미디어 이외에 추가적인 미디어를 업로드할 때 사용 
 
-5. Comment
+#### 5. Comment
 ```python
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
@@ -119,8 +119,9 @@ class Comment(models.Model):
 ```
 * 한 포스팅에 여러개의 댓글 존재, FK 사용
 * 한 유저가 여러개의 댓글 게시 가능, FK 사용 
+* str(): 누가 어느 포스팅에 어느 댓글을 남겼는지 표현 
 
-6. Like
+#### 6. Like
 ```python
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
@@ -132,6 +133,15 @@ class Like(models.Model):
 ```
 * 한 포스팅에 여러개의 좋아요 존재, FK 사용
 * 한 유저가 여러개의 좋아요 가능, FK 사용
+
+#### Migration
+* ImageField를 지원하기 위해서 Pillow 설치:
+```python -m pip install Pillow```
+  
+
+* ```python manage.py makemigrations api```
+  
+* ```python manage.py migrate```
 
 ### ORM 적용해보기
 shell에서 작성한 코드와 그 결과를 보여주세요!
