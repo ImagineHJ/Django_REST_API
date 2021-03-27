@@ -10,7 +10,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
     website = models.TextField(max_length=100, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    profile_img = models.ImageField(blank=True)
+    profile_img = models.ImageField(blank=True, upload_to="profile_img")  # save to media/profile_img
     post_num = models.IntegerField(default=0)
     follower_num = models.IntegerField(default=0)
     following_num = models.IntegerField(default=0)
@@ -38,7 +38,7 @@ class Post(models.Model):
     media_num = models.IntegerField(default=1)  # at least one media
 
     # Add (a post requires at least one media)
-    media_file = models.FileField()  # first media
+    media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
@@ -48,7 +48,7 @@ class Post(models.Model):
 class Media(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
     media_num = models.IntegerField()  # num of media in the post 12~10
-    media_file = models.FileField()
+    media_file = models.FileField(upload_to="post_media")  # save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):

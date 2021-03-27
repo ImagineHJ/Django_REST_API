@@ -41,7 +41,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
     website = models.TextField(max_length=100, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    profile_img = models.ImageField(blank=True)
+    profile_img = models.ImageField(blank=True, upload_to="profile_img")  # save to media/profile_img
     post_num = models.IntegerField()
     follower_num = models.IntegerField()
     following_num = models.IntegerField()
@@ -83,7 +83,7 @@ class Post(models.Model):
     media_num = models.IntegerField(default=1)  # at least one media
     
     # Add (a post requires at least one media)
-    media_file = models.FileField()  # first media
+    media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
@@ -97,7 +97,7 @@ class Post(models.Model):
 class Media(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="media")
     media_num = models.IntegerField()  # num of media in the post 2~10
-    media_file = models.FileField()
+    media_file = models.FileField(upload_to="post_media")  # save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
@@ -159,7 +159,7 @@ shell에서 작성한 코드와 그 결과를 보여주세요!
 
 * user1의 게시물 3개 생성<br><br>
   * "This is the picture of me with my pet dog" (사진)<br></br>
-  * "An old family picture of my childhodd" (영상) <br></br>
+  * "An old family picture of my childhood" (영상) <br></br>
   * "I went to DisneyLand! Miss those times...:(" (사진)<br></br>
 <img width="904" alt="create posts" src="https://user-images.githubusercontent.com/57395765/112436074-e8754400-8d88-11eb-8443-3ad86ae82ec0.png">
 
