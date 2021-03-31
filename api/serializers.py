@@ -14,12 +14,6 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = '__all__'
-
-
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
@@ -36,3 +30,21 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = '__all__'
+
+
+class PostSerializer(serializers.ModelSerializer):
+    # nested Serializer
+    comments = CommentSerializer(many=True, read_only=True)
+    likes = LikeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+
+
+
+
+
+
+
