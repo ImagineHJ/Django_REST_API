@@ -8,18 +8,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Follow
-        fields = '__all__'
-
-
-class MediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Media
-        fields = '__all__'
-
-
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
@@ -36,10 +24,14 @@ class PostSerializer(serializers.ModelSerializer):
     # nested Serializer
     comments = CommentSerializer(many=True, read_only=True)
     likes = LikeSerializer(many=True, read_only=True)
+    profile_username = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = '__all__'  # all fields in the model
+
+    def get_profile_username(self, obj):
+        return obj.profile.user.username
 
 
 

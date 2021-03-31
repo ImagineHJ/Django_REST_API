@@ -15,7 +15,7 @@ def post_list(request):
     if request.method == 'GET':
         post = Post.objects.all()  # get queryset of the Post
         serializer = PostSerializer(post, many=True)  # Serialize it to python native data type
-        return JsonResponse(serializer.data)  # response with JSON
+        return JsonResponse(serializer.data, safe=False)  # response with JSON
 
     # add data
     elif request.method == 'POST':
