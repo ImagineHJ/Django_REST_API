@@ -13,15 +13,15 @@ def post_list(request):
     """
     # view data
     if request.method == 'GET':
-        post = Post.objects.all()
-        serializer = PostSerializer(post, many=True)
-        return JsonResponse(serializer.data)
+        post = Post.objects.all()  # get queryset of the Post
+        serializer = PostSerializer(post, many=True)  # Serialize it to python native data type
+        return JsonResponse(serializer.data)  # response with JSON
 
     # add data
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
+        data = JSONParser().parse(request)  # parse the JSON data
         serializer = PostSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  # save to DB
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
