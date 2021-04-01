@@ -43,7 +43,7 @@ class Post(models.Model):
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
-        return 'post: {} by {}'.format(self.text, self.profile.user.username)
+        return 'post{}, {} by {}'.format(self.id, self.text, self.profile.user.username)
 
 
 class Media(models.Model):
@@ -64,7 +64,7 @@ class Comment(models.Model):
     text = models.TextField(max_length=500, blank=True)
 
     def __str__(self):
-        return 'comment: {} on post: {} by {}'.format(self.text, self.post.text, self.profile.user.username)
+        return 'comment: {} on post{} by {}'.format(self.text, self.post.id, self.profile.user.username)
 
 
 class Like(models.Model):

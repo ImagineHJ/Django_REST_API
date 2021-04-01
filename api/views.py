@@ -9,7 +9,7 @@ from .serializers import PostSerializer
 @csrf_exempt
 def post_list(request):
     """
-    List all code posts, or create a new snippet.
+    List all code posts, or create a new post.
     """
     # view data
     if request.method == 'GET':

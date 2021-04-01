@@ -189,14 +189,148 @@ shell에서 작성한 코드와 그 결과를 보여주세요!
 ### 모델 선택 및 데이터 삽입
 선택한 모델의 구조와 데이터 삽입 후의 결과화면을 보여주세요!
 
+```python
+class Post(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    text = models.TextField(max_length=500, blank=True)
+
+    # Add (a post requires at least one media)
+    media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media
+    is_video = models.BooleanField()  # file can be either img or vid
+
+    def __str__(self):
+        return 'post{}, {} by {}'.format(self.id, self.text, self.profile.user.username)
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="comments")
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+    text = models.TextField(max_length=500, blank=True)
+
+    def __str__(self):
+        return 'comment: {} on post{} by {}'.format(self.text, self.post.id, self.profile.user.username)
+```
+
+
+```python
+>>> Post.objects.all()
+<QuerySet 
+[<Post: post1, This is the picture of me with my pet dog by user1>, 
+<Post: post2, An old family video of my childhood! by user1>, 
+<Post: post3, I went to DisneyLand! Miss those times...:( by user1>]>
+
+>>> Comment.objects.all()
+<QuerySet 
+[<Comment: comment: Looking good! on post1 by user2>, 
+<Comment: comment: Your dog is so cute >_< on post1 by user2>]>
+
+```
+* 3개의 post, post1에 달린 2개의 comment
+
+```python
+class PostSerializer(serializers.ModelSerializer):
+    # nested Serializer
+    comments = CommentSerializer(many=True, read_only=True)
+    likes = LikeSerializer(many=True, read_only=True)
+    profile_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = '__all__'  # all fields in the model
+
+    def get_profile_username(self, obj):
+        return obj.profile.user.username
+```
+
+* nested serializer로 post의 comments, likes까지 serialize
+* serializer method field로 post 작성자의 username 가져옴 
+
 ### 모든 list를 가져오는 API
-API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+```python
+# api/views.py
+
+@csrf_exempt
+def post_list(request):
+    # view data
+    if request.method == 'GET':
+        post = Post.objects.all()  # get queryset of the Post
+        serializer = PostSerializer(post, many=True)  # Serialize it to python native data type
+        return JsonResponse(serializer.data, safe=False)  # response with JSON
+
+```
+  
+* **JsonResponse**: dictionary, list 등 python data type을 JSON 형식으로 변환
+  변환할 데이터가 dictionary가 아닌 경우 ```safe=False``` 설정 
+* **CSRF(Cross Site Request Forgery)**: 사용자의 의지와 무관하게 request에 요청을 보내도록 하는 해킹 수법, Django에서는 CSRF방어를 내장기능으로 지원하고 있음
+* `````@csrf_exempt````` : 개발 시 불편함을 해결하기 위해 함수 상단에 작성해, CSRF 방어 해제 
+
+
+
+```python
+# api/urls.py
+
+urlpatterns = [
+    path('posts/', views.post_list)
+]
+```
+```python
+# config/urls.py
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
+]
+```
+* **include()**: 일치하는 문자열 자르고, 뒤 문자열은 api의 url conf로 전달
+* ```/api/posts/```가 되면 views.py의 post_list() 호출 
+
+
+* URL: ```api/posts/```
+* Method: ```GET```
+
+
 
 ### 새로운 데이터를 create하도록 요청하는 API
-요청한 URL 및 Body 데이터의 내용과 create된 결과를 보여주세요!
+
+
+```python
+# api/views.py
+
+def post_list(request):
+  ...
+    # add data
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)  # parse the JSON data
+        serializer = PostSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()  # save to DB
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+```
+
+* 파싱한 JSON data를 받아서 deserialize한 후 valid data 체킹 
+* 잘 설계된 REST API는 URI만 잘 설계된 것이 아닌 그 리소스에 대한 응답을 잘 내어주는 것도 포함 
+* **201 상태 코드**: 클라이언트가 어떠한 리소스 생성을 요청, 해당 리소스가 성공적으로 생성됨(POST를 통한 리소스 생성 작업 시)
+* **400 상태 코드**: 클라이언트의 요청이 부적절 할 경우 사용하는 응답 코드
+
+* URL: ```api/posts/```
+* Method: ```POST```
+
+
+
 
 ### 공부한 내용 정리
 새로 알게된 점, 정리 하고 싶은 개념, 궁금한점 등을 정리해 주세요
+
+
+#### GET
+
+#### POST
+
 
 ### 간단한 회고
 과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
