@@ -39,7 +39,7 @@ class Post(models.Model):
     # media_num = models.IntegerField(default=1)  # at least one media
 
     # Add (a post requires at least one media)
-    media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media
+    media_file = models.FileField(null=True, upload_to="post_media")  # first/thumbnail media, save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
