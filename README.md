@@ -432,14 +432,14 @@ def post_list(request):
 
 
 
-<a src="https://blog.naver.com/astro0/222293557953">**[출처]**</a>
+[**[출처]**](https://blog.naver.com/astro0/222293557953)
 
 ### 간단한 회고
 
 실습 자체는 예시 코드를 참고할 수 있어서 어렵지 않았지만 Serialize, REST 라는 개념이 확 와닿지 않았다. 
 이해도를 높일 수 있는 좋은 블로그 글을 찾았고, 전반적으로 웹 서비스가 어떻게 돌아가는지 이해할 수 있었다.
 
-<a src="https://post.naver.com/viewer/postView.nhn?volumeNo=30717005&memberNo=6457418&vType=VERTICAL">**[참고한 블로그]**</a>
+[**[참고한 블로그]**](https://post.naver.com/viewer/postView.nhn?volumeNo=30717005&memberNo=6457418&vType=VERTICAL)
 
 * 서버와 클라이언트가 소통할 때는 API를 사용하고, API의 파일 형식은 JSON, 개발자들 사이에서 규격화된 API의 형식이 REST(GET, POST)이다. 
 * python 기반인 django 서버에서는 클라이언트한테 보내는 데이터를 python data type으로 Serialize(변환?)하고, Serialize된 데이터를 JSON으로 렌더링해서 클라이언트에게 보내준다. 
