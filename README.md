@@ -232,6 +232,28 @@ class Comment(models.Model):
 * 3개의 post, post1에 달린 2개의 comment
 
 ```python
+class CommentSerializer(serializers.ModelSerializer):
+    profile_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = ['profile_username', 'text', 'create_date', 'post']
+
+    def get_profile_username(self, obj):
+        return obj.profile.user.username
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    profile_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Like
+        fields = ['profile_username', 'like_date', 'post']
+
+    def get_profile_username(self, obj):
+        return obj.profile.user.username
+
+
 class PostSerializer(serializers.ModelSerializer):
     # nested Serializer
     comments = CommentSerializer(many=True, read_only=True)
@@ -240,14 +262,15 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'  # all fields in the model
+        fields = ['id', 'profile_username', 'media_file', 'is_video', 'text', 'create_date', 'comments', 'likes']
 
     def get_profile_username(self, obj):
         return obj.profile.user.username
 ```
 
 * nested serializer로 post의 comments, likes까지 serialize
-* serializer method field로 post 작성자의 username 가져옴 
+* 알아보기 쉽도록, serializer method field로 post 작성자의 username 가져옴
+* fields에 '\_\_all\_\_'을 작성했다가, 인스타그램을 참고해서 노출되는 필드만을 설정
 
 ### 모든 list를 가져오는 API
 ```python
@@ -296,56 +319,46 @@ urlpatterns = [
 [
     {
         "id": 1,
-        "comments": [
-            {
-                "id": 1,
-                "create_date": "2021-03-31T18:42:36.646261+09:00",
-                "update_date": "2021-03-31T18:42:36.646302+09:00",
-                "text": "Looking good!",
-                "post": 1,
-                "profile": 2
-            },
-            {
-                "id": 2,
-                "create_date": "2021-03-31T18:43:28.014466+09:00",
-                "update_date": "2021-03-31T18:43:28.014507+09:00",
-                "text": "Your dog is so cute >_<",
-                "post": 1,
-                "profile": 2
-            }
-        ],
-        "likes": [],
         "profile_username": "user1",
-        "create_date": "2021-03-25T16:28:53.833162+09:00",
-        "update_date": "2021-03-25T16:28:53.833204+09:00",
-        "text": "This is the picture of me with my pet dog",
         "media_file": null,
         "is_video": false,
-        "profile": 1
+        "text": "This is the picture of me with my pet dog",
+        "create_date": "2021-03-25T16:28:53.833162+09:00",
+        "comments": [
+            {
+                "profile_username": "user2",
+                "text": "Looking good!",
+                "create_date": "2021-03-31T18:42:36.646261+09:00",
+                "post": 1
+            },
+            {
+                "profile_username": "user2",
+                "text": "Your dog is so cute >_<",
+                "create_date": "2021-03-31T18:43:28.014466+09:00",
+                "post": 1
+            }
+        ],
+        "likes": []
     },
     {
         "id": 2,
-        "comments": [],
-        "likes": [],
         "profile_username": "user1",
-        "create_date": "2021-03-25T16:30:49.907742+09:00",
-        "update_date": "2021-03-25T16:30:49.907794+09:00",
-        "text": "An old family video of my childhood!",
         "media_file": null,
         "is_video": true,
-        "profile": 1
+        "text": "An old family video of my childhood!",
+        "create_date": "2021-03-25T16:30:49.907742+09:00",
+        "comments": [],
+        "likes": []
     },
     {
         "id": 3,
-        "comments": [],
-        "likes": [],
         "profile_username": "user1",
-        "create_date": "2021-03-25T16:31:42.307405+09:00",
-        "update_date": "2021-03-25T16:31:42.307457+09:00",
-        "text": "I went to DisneyLand! Miss those times...:(",
         "media_file": null,
         "is_video": false,
-        "profile": 1
+        "text": "I went to DisneyLand! Miss those times...:(",
+        "create_date": "2021-03-25T16:31:42.307405+09:00",
+        "comments": [],
+        "likes": []
     }
 ]
 ```
@@ -392,16 +405,14 @@ def post_list(request):
 
 ```json
 {
-    "id": 4,
-    "comments": [],
-    "likes": [],
-    "profile_username": "user1",
-    "create_date": "2021-04-01T17:42:45.143591+09:00",
-    "update_date": "2021-04-01T17:42:45.143631+09:00",
-    "text": "I am studying at a cafe, right now",
-    "media_file": null,
-    "is_video": false,
-    "profile": 1
+      "id": 4,
+      "profile_username": "user1",
+      "media_file": null,
+      "is_video": false,
+      "text": "I am studying at a cafe, right now",
+      "create_date": "2021-04-01T17:42:45.143591+09:00",
+      "comments": [],
+      "likes": []
 }
 ```
 
