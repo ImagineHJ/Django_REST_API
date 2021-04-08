@@ -459,26 +459,301 @@ def post_list(request):
 
 
 ## 4주차 과제 (기한: 4/8 목요일까지)
+
+### CVB
+이전 코드 DRF에서 제공하는 CVB로 수정
+```python
+# api/views.py
+
+# def post_list(request):
+class PostList(APIView):
+    # if request.method == 'GET':
+    def get(self, request, format=None):
+        post = Post.objects.all()  # get queryset of the Post
+        serializer = PostSerializer(post, many=True)  # Serialize it to python native data type
+        # return JsonResponse(serializer.data, safe=False)  # response with JSON
+        return Response(serializer.data) # Renders to content type as requested by the client
+
+    # elif request.method == 'POST':
+    def post(self, request, format=None):
+        # data = JSONParser().parse(request)  # parse the JSON data
+        # serializer = PostSerializer(data=data)
+        serializer = PostSerializer(data=request.data)  # Handles arbitrary data.  Works for 'POST', 'PUT' and 'PATCH' methods
+        if serializer.is_valid():
+            serializer.save()  # save to DB
+            # return JsonResponse(serializer.data, status=201)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)  
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+```
+* request.data : JSON 이외의 형식을 가진 파일도 처리 
+* Response() : 요청한 데이터 타입으로 렌더링 (JSON 형식에 한정되지 않음)
+* request, response에서 JSON으로 한정된 파일 형식 -> 해결 
+
+
+
+특정 Post에 관한 요청을 처리하는 클래스 추가 
+```python
+class PostDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post, data=request.data)  # pass the instance we want to update and new data
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        post = self.get_object(pk)
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+* url에서 pk를 파라미터로 전달받음
+* 모든 메소드에서 custom 함수 get_object를 호출해 전달받은 pk값을 가진 객체를 받는다 / 없는 경우 에러 처리 -> CBV의 재사용성
+* PUT : Serializer를 호출할 때 update하고자 하는 객체와 새로운 데이터를 인자로 전달
+* DELETE : ORM delete()를 이용해서 DB에서 삭제 
+
+```python
+# urls.py
+
+from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+from api import views
+
+urlpatterns = [
+    path('posts/', views.PostList.as_view()),
+    path('posts/<int:pk>', views.PostDetail.as_view())
+]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
+```
+
+* \<int:pk\> : URL의 정수 값을 pk라는 이름으로 받아서 view로 전
+* as_view() : dispatch() 호출 -> request에 따라 get(), post() 등 호출
+* 파일 확장자를 URL 뒤에 붙여, 파일 형식을 명시하는 경우가 많다. (예. 'http://example.com/api/users.json') 하지만 일일히 이를 URLconf에 패턴으로 등록하기 어려움 <br>
+-> **format_suffix_patterns** : 파일 확장명이 뒤에 붙은 URL을 등록 및 처리할 수 있도록 함 (해당 view 함수에 format argument 지정해야 함 )
+
 ### 모든 list를 가져오는 API
-API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+* URL: ```api/posts/```
+* Method: ```GET```
+```json
+[
+    {
+        "id": 1,
+        "profile_username": "user1",
+        "media_file": null,
+        "is_video": false,
+        "text": "This is the picture of me with my pet dog",
+        "create_date": "2021-03-25T07:28:53.833162",
+        "comments": [
+            {
+                "profile_username": "user2",
+                "text": "Looking good!",
+                "create_date": "2021-03-31T09:42:36.646261",
+                "post": 1
+            },
+            {
+                "profile_username": "user2",
+                "text": "Your dog is so cute >_<",
+                "create_date": "2021-03-31T09:43:28.014466",
+                "post": 1
+            }
+        ],
+        "likes": []
+    },
+    {
+        "id": 2,
+        "profile_username": "user1",
+        "media_file": null,
+        "is_video": true,
+        "text": "An old family video of my childhood!",
+        "create_date": "2021-03-25T07:30:49.907742",
+        "comments": [],
+        "likes": []
+    },
+    {
+        "id": 3,
+        "profile_username": "user1",
+        "media_file": null,
+        "is_video": false,
+        "text": "I went to DisneyLand! Miss those times...:(",
+        "create_date": "2021-03-25T07:31:42.307405",
+        "comments": [],
+        "likes": []
+    },
+    {
+        "id": 4,
+        "profile_username": "user1",
+        "media_file": null,
+        "is_video": false,
+        "text": "I am studying at a cafe, right now",
+        "create_date": "2021-04-01T08:42:45.143591",
+        "comments": [],
+        "likes": []
+    }
+]
+```
 
 ### 특정 데이터를 가져오는 API
-API 요청한 URL과 결과 데이터를 코드로 보여주세요!
+* URL: ```api/posts/1```
+* Method: ```GET```
+```json
+{
+    "id": 1,
+    "profile_username": "user1",
+    "media_file": null,
+    "is_video": false,
+    "text": "This is the picture of me with my pet dog",
+    "create_date": "2021-03-25T07:28:53.833162",
+    "comments": [
+        {
+            "profile_username": "user2",
+            "text": "Looking good!",
+            "create_date": "2021-03-31T09:42:36.646261",
+            "post": 1
+        },
+        {
+            "profile_username": "user2",
+            "text": "Your dog is so cute >_<",
+            "create_date": "2021-03-31T09:43:28.014466",
+            "post": 1
+        }
+    ],
+    "likes": []
+}
+```
 
 ### 새로운 데이터를 생성하는 API
-요청 URL 및 body 데이터의 내용과 create된 결과를 보여주세요!
+* URL: ```api/posts/```
+* Method: ```POST```
+* Body
+<img width="1234" alt="스크린샷 2021-04-07 오후 6 44 34" src="https://user-images.githubusercontent.com/57395765/113848920-ee7d1300-97d3-11eb-9f24-dd5240d588b3.png">
+```json
+{
+    "id": 5,
+    "profile_username": "user2",
+    "profile": 2,
+    "media_file": "/media/post_media/IMG_5527_4FTlMUl.JPG",
+    "is_video": false,
+    "text": "\"I went to London last year\"",
+    "create_date": "2021-04-07T18:49:07.433259",
+    "comments": [],
+    "likes": []
+}
+```
 
 ### 특정 데이터를 업데이트하는 API
-요청 URL 및 body 데이터의 내용과 update된 결과를 보여주세요!
+
+* URL: ```api/posts/```
+* Method: ```PUT```
+* Body
+<img width="1195" alt="스크린샷 2021-04-07 오후 7 00 48" src="https://user-images.githubusercontent.com/57395765/113848935-f2a93080-97d3-11eb-85d8-5987a2a93a70.png">
+```json
+{
+    "id": 4,
+    "profile_username": "user1",
+    "profile": 1,
+    "media_file": null,
+    "is_video": false,
+    "text": "I am relaxing at a cafe near my home",
+    "create_date": "2021-04-01T08:42:45.143591",
+    "comments": [],
+    "likes": []
+}
+```
+* profile 필드에 값을 필수로 넣어주어야 한다 (FK로 연결된 필드여서 그런 것 같다...)
 
 ### 특정 데이터를 삭제하는 API
 요청 URL 및 delete된 결과를 보여주세요!
+* URL: ```api/posts/2```
+* Method: ```DELETE```
+```json
+[
+    {
+        "id": 1,
+        "profile_username": "user1",
+        "profile": 1,
+        "media_file": null,
+        "is_video": false,
+        "text": "This is the picture of me with my pet dog",
+        "create_date": "2021-03-25T07:28:53.833162",
+        "comments": [
+            {
+                "profile_username": "user2",
+                "text": "Looking good!",
+                "create_date": "2021-03-31T09:42:36.646261",
+                "post": 1
+            },
+            {
+                "profile_username": "user2",
+                "text": "Your dog is so cute >_<",
+                "create_date": "2021-03-31T09:43:28.014466",
+                "post": 1
+            }
+        ],
+        "likes": []
+    },
+    {
+        "id": 3,
+        "profile_username": "user1",
+        "profile": 1,
+        "media_file": null,
+        "is_video": false,
+        "text": "I went to DisneyLand! Miss those times...:(",
+        "create_date": "2021-03-25T07:31:42.307405",
+        "comments": [],
+        "likes": []
+    },
+    {
+        "id": 4,
+        "profile_username": "user1",
+        "profile": 1,
+        "media_file": null,
+        "is_video": false,
+        "text": "I am relaxing at a cafe near my home",
+        "create_date": "2021-04-01T08:42:45.143591",
+        "comments": [],
+        "likes": []
+    },
+    {
+        "id": 5,
+        "profile_username": "user2",
+        "profile": 2,
+        "media_file": "/media/post_media/IMG_5527_4FTlMUl.JPG",
+        "is_video": false,
+        "text": "\"I went to London last year\"",
+        "create_date": "2021-04-07T18:49:07.433259",
+        "comments": [],
+        "likes": []
+    }
+]
+```
 
 ### 공부한 내용 정리
 새로 알게된 점, 정리 하고 싶은 개념, 궁금한점 등을 정리해 주세요
 
 ### 간단한 회고
-과제 시 어려웠던 점이나 느낀 점, 좋았던 점 등을 간단히 적어주세요!
+Django 개발 중 view 파트가 가장 핵심적이면서도 어려운 것 같다. 지금까지 개발한 API 서버의 동작 과정을 정리해보았다. 
+
+1. 클라이언트가 URL에 접속 
+2. 서버에 request가 옴
+3. URLconf가 문자열 비교를 통해 해당 URL에 지정된 view를 호출 (이때 인자 값을 넘겨줄 수 있음)
+4. view에서는 데이터 처리 등 다양한 작업이 이루지고 -> 이후 클라이언트에게 다시 response 보냄
+5. 프론트엔드에서 이를 적절히 처리해서 사용자에게 보여줌 
+
+view에서도 확실히 클래스 기반 뷰가 효율적일 것 같다. 클래스에서 함수나 변수를 정의해 이를 여러 메소드에서 사용할 수 있을 것 같다. 뷰를 더 효율적으로 작성할 수 있도록 많은 연습과 공부가 필요할 것 같다.
 
 
 

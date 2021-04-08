@@ -43,7 +43,7 @@ class PostList(APIView):
         serializer = PostSerializer(post, many=True)  # Serialize it to python native data type
 
         # return JsonResponse(serializer.data, safe=False)  # response with JSON
-        return Response(serializer.data)
+        return Response(serializer.data) # Renders to content type as requested by the client
 
     # elif request.method == 'POST':
     def post(self, request, format=None):
@@ -75,7 +75,7 @@ class PostDetail(APIView):
 
     def put(self, request, pk, format=None):
         post = self.get_object(pk)
-        serializer = PostSerializer(post, data=request.data)
+        serializer = PostSerializer(post, data=request.data)  # pass the instance we want to update and new data
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
