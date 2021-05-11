@@ -10,7 +10,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
     website = models.TextField(max_length=100, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    profile_img = models.ImageField(blank=True, upload_to="profile_img")  # save to media/profile_img
+    profile_img = models.ImageField( upload_to="profile_img")  # save to media/profile_img
 
     # post_num = models.IntegerField(default=0)
     # follower_num = models.IntegerField(default=0)

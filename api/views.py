@@ -6,7 +6,7 @@ from .serializers import PostSerializer
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 
 # Create your views here.
 '''
@@ -32,6 +32,9 @@ def post_list(request):
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
 '''
+
+'''
+# Use viewsets instead of APIview
 
 # def post_list(request):
 class PostList(APIView):
@@ -85,3 +88,15 @@ class PostDetail(APIView):
         post = self.get_object(pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+'''
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing post instances.
+    """
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
+
+
