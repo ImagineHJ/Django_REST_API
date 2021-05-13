@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'api.apps.ApiConfig',  # include api app
     'rest_framework',  # include rest
+    'django_filters',  # include filter
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

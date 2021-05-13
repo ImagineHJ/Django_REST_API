@@ -758,7 +758,7 @@ view에서도 확실히 클래스 기반 뷰가 효율적일 것 같다. 클래�
 
 ## 6주차 과제 (기한: 5/13 목요일까지)
 
-### ViewSet 
+### 1. Viewset으로 리팩토링하기
 
 
 ```python
@@ -771,11 +771,11 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
 ```
 * ModelViewSet을 사용해 긴 코드를 아주 심플하게 바꾸었다
-* 일반 ViewSet보다는, 기본적인 메소드를 처해주는 base class(대표적으로 ModelViewSet)를 사용한다.
+* 일반 ViewSet보다는, 기본적인 메소드를 처리해주는 base class(대표적으로 ModelViewSet)를 사용한다.
 * ModelViewSet에는 ```.list()``` ->전체 조회 , ```.retrieve()```->특정 객체 조회 ,
   ```.create()```->객체 생성 , ```.update()```->객체 수정, 
   ```.partial_update()```->객체 부분 수정 , ```.destroy()```->삭제  를 처리해준다.
-* GenericAPIView를 상속받기 때문에  queryset, serializer_class는 지정해주어야 함.
+* GenericAPIView를 상속받기 때문에  ```queryset```, ```serializer_class```는 지정해주어야 함.
   
 
 ```python
@@ -785,8 +785,116 @@ router.register(r'Post', PostViewSet)   # register()함으로써 두 개의 url 
 
 urlpatterns = router.urls
 ```
+* 직접 url과 view method를 연결하지 않아도 됨 
+* 일반적으로 list(), create()는 ```'post/'``` url을 사용하고, 
+  retrieve(), update(), destroy()는 ```'post/<int:pk>'``` url을 사용 -> 자동으로 url과 메소드를 매핑해줌 
 
 
-### 공부한 내용 정리
+#### ModelViewSet, Router를 사용했을 때 장단점?
+[장점]
+* view 메소드들이 한 클래스에 합쳐지게 돼서 편리하다 . 예를 들면 queryset을 한 번만 지정해주면 여러 메소드에서 사용할 수 있는 것
+* router를 사용하기 때문에 url을 하나씩 메소드에 매핑해주는 귀찮은 작업이 필요없다.->사람이 할 때보다 더 일관성 있는 URL 매핑이 가능함
+* 편리하고, 간단하고, 코드양도 적어서 개발 속도가 빠름...전반적으로 효율적이다
+
+[단점]
+* 제공되는 클래스를 가져다 쓰는 것이기 때문에, 세부적인 커스터마이징이 어렵다. 
+* 코드 몇 줄로 완성되기 때문에, API 동작 방식을 알기 어렵고 직관적이지 않다.
+
+### 2. filter 기능 구현하기
+
+[ 환경 세팅 ]
+* ```pip install django-filter```로 filter 다운로드하기
+
+* settings.py의 APPS에 추가 
+```
+INSTALLED_APPS = [
+    ...
+    'django_filters',
+    ...
+]
+```
+* filter backend는 settings.py에 default로 추가하는 것과,
+  각 view에 일일히 추가하는 방법이 존재
+  
+
+```python
+  # settings.py
+  REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+} 
+  ```
+
+```
+# views.py
+from django_filters.rest_framework import DjangoFilterBackend
+
+class UserListView(generics.ListAPIView):
+    ...
+    filter_backends = [DjangoFilterBackend]
+```
+<hr>
+[필터셋 구현] 
+
+
+```python
+# views.py
+
+class PostFilter(FilterSet):
+    video = filters.BooleanFilter(field_name='is_video')
+    following = filters.CharFilter(method='filter_following_posts')
+
+    class Meta:
+        model = Post
+        fields = ['profile']
+
+    def filter_following_posts(self, queryset, name, value):
+        filtered_queryset = queryset.filter(profile__following__followers=self.request.user)
+        return filtered_queryset
+```
+* Instagram에서는 내가 작성한 게시글, 내가 팔로우한 사람이 작성한 게시글을 주로 보게 된다.
+  
+필터셋에서 필터 구현은 크게 3가지 방법이 있다
+
+**1. Filter 함수 이용**
+   <br>field_name, lookup_expr argument를 지정해서 필터링 
+   <br>ex) BooleanFilter를 사용해서 썸네일 미디어가 동영상인 post를 필터하는 것 구현
+  
+**2. method 정의**
+<br>필드 값에 한정되지 않은 필터를 구현
+   <br> ex) filter_following_posts()는 posts 전체 쿼리셋 중, 
+  작성자(profile)의 following을 역참조해 작성자를 팔로우하는 사람이 유저인 것만 필터
+  (즉, request.user가 팔로우하는 작성자의 글만 필터)
+
+**3. Meta class 사용**
+<br>Meta의 fields에만 작성하면, 해당 필드 값의 일치여부를 파악해주는 필터 구현 
+   <br> ex) profile이 일치하는 post를 필터해준다. 디폴트는 exact
+<br>
+<br> dictionary 형식으로 작성하면 각 필드에 대한 필터를 다르게 설정할 수 있다.
+```python
+fields = {
+            'username': ['exact', ],
+            'first_name': ['icontains', ],
+            'last_name': ['exact', ],
+            'date_joined': ['year', 'year__gt', 'year__lt', ],
+        }
+```
+**Q** 필터셋에 대해 제가 이해한 것이 맞나요..? ㅠ0ㅠ   
+
+**Q** : self.request.user과 profile instance를 "=" 연산자로 비교할 수 있는가..? 
+
+**Q** : following 같은 경우는 method를 정의해서 사용하는데, CharFilter이 아닌 것 같은데..
+  이 경우에는 어떤 Filter 함수를 사용해야 하는가?
+  
+**Q** : 이 필터는 어떻게 호출해서 어디에 사용되게 되는지..?(더 공부하고, 찾아보기...)
+
+
+참고 자료 - https://yongbeomkim.github.io/django/dj-filter-tuorial1/
+
+
 ### 간단한 회고
-
+* ViewSet은 신세계다..! 길다란 코드를 몇 줄로 줄여주는 마법을 맛봤지만, 이를 잘 활용하기 위해서는 더 많은 공부가 필요할 것 같다.
+필요하면 ViewSet을 사용하되, 내가 의도하고자 하는 방식으로 자유롭게 커스터마이징할 수 있는 것이 BEST일 것 같다. 
+  이를 자유자재로 다룰 수 있도록 더 많이 공부해야겠다.
+  
+* filter의 필요성은 느끼고 있는데, filter set을 정확히 어떻게 정의하고 사용하는지 이해가 잘 안간다. 
+  특히 공식 문서에 있는 자료만으로는 이해가 잘 안돼서 더 많이 찾아보고 공부해야함을 느꼈다.
