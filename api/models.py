@@ -17,6 +17,7 @@ class Profile(AbstractUser, Base):
     website = models.TextField(max_length=100, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     profile_img = models.ImageField( upload_to="profile_img")  # save to media/profile_img
+    private = models.BooleanField(default=False)
 
     # post_num = models.IntegerField(default=0)
     # follower_num = models.IntegerField(default=0)
@@ -43,6 +44,7 @@ class Content(Base):
     # like_num = models.IntegerField(default=0)
     # comment_num = models.IntegerField(default=0)
     # media_num = models.IntegerField(default=1)  # at least one media
+
 
     # Add (a post requires at least one media)
     media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media

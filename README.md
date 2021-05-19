@@ -923,6 +923,14 @@ class Profile(AbstractUser, Base):
     # user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
 ```
 
-* https://docs.djangoproject.com/en/1.8/_modules/django/contrib/auth/models/
+* Abstract User Model 참고 문서 : https://docs.djangoproject.com/en/1.8/_modules/django/contrib/auth/models/
   
 #### 3. Post는 REST API의 method이름이기에, Post->Content로 이름 변경 
+* view, url, model, serializer 모두 꼼꼼히 변경
+* migration을 새로하는 과정에서, Post==Content인 것을 Django는 모르게 때문에 
+  FK로 content가 있는 필드에 디폴트 값을 넣으라고 뜬다...
+  서비스 단계가 아니기 때문에 마이그래이션과 DB를 삭재하고 다시 마이그래이션을 했음 -> 엄청난 에러와의 싸움...ㅠ0ㅠ
+  
+* 먼저 개발 초기에 Modeling을 엄청 잘 해야한다는 것을 뼈져리게 느낌...->서비스를 한다고 치면 데이터를 삭제할 수 없기 때문에...ㅠㅠ
+만약 어쩔 수 없이 이런 일이 일어나면...잘 처리할 수 있도록 마이그래이션 공부를 더 열심히 해야겠다...
+  

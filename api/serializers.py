@@ -5,7 +5,23 @@ from .models import Profile, Follow, Content, Media, Comment, Like
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = '__all__' # all fields in the model
+        # fields = '__all__' # all fields in the model
+        fields = ['username', 'first_name', 'last_name', 'bio', 'website', 'profile_img', 'private']
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    follower_username = serializers.SerializerMethodField()
+    followed_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Like
+        fields = ['follower_username', 'followed_username']
+
+    def get_follower_username(self, obj):
+        return obj.profile.username
+
+    def get_followed_username(self, obj):
+        return obj.followed_user_id.username
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -19,7 +35,6 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.profile.username
 
 
-
 class LikeSerializer(serializers.ModelSerializer):
     profile_username = serializers.SerializerMethodField()
 
@@ -31,10 +46,17 @@ class LikeSerializer(serializers.ModelSerializer):
         return obj.profile.username
 
 
+class MediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Media
+        fields = ['media_idx', 'media_file', 'is_video']
+
+
 class ContentSerializer(serializers.ModelSerializer):
     # nested Serializer
     comments = CommentSerializer(many=True, read_only=True)
     likes = LikeSerializer(many=True, read_only=True)
+    medias = MediaSerializer(many=True, read_only=True)
     profile_username = serializers.SerializerMethodField()
 
     class Meta:
