@@ -1,11 +1,11 @@
 # from django.http import JsonResponse
 # from django.views.decorators.csrf import csrf_exempt
 # from rest_framework.parsers import JSONParser
-from .models import Content
-from .serializers import ContentSerializer
-from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.response import Response
+# from django.http import Http404
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+from .models import Profile, Follow, Content, Media, Comment, Like
+from .serializers import ProfileSerializer, FollowSerializer, ContentSerializer, MediaSerializer, CommentSerializer, LikeSerializer
 from rest_framework import status, viewsets
 from django_filters.rest_framework import FilterSet, filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -92,6 +92,16 @@ class PostDetail(APIView):
 '''
 
 
+class ProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    queryset = Content.objects.all()
+
+
+class FollowViewSet(Follow.ModelViewSet):
+    serializer_class = ProfileSerializer
+    queryset = Content.objects.all()
+
+
 class ContentFilter(FilterSet):
     video = filters.BooleanFilter(name='is_video')
     following = filters.CharFilter(method='filter_following_contents')
@@ -111,4 +121,16 @@ class ContentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
 
 
+class MediaViewSet(Follow.ModelViewSet):
+    serializer_class = MediaSerializer
+    queryset = Content.objects.all()
 
+
+class CommentViewSet(Follow.ModelViewSet):
+    serializer_class = CommentSerializer
+    queryset = Content.objects.all()
+
+
+class LikeViewSet(Follow.ModelViewSet):
+    serializer_class = LikeSerializer
+    queryset = Content.objects.all()

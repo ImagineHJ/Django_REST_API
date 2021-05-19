@@ -934,3 +934,29 @@ class Profile(AbstractUser, Base):
 * 먼저 개발 초기에 Modeling을 엄청 잘 해야한다는 것을 뼈져리게 느낌...->서비스를 한다고 치면 데이터를 삭제할 수 없기 때문에...ㅠㅠ
 만약 어쩔 수 없이 이런 일이 일어나면...잘 처리할 수 있도록 마이그래이션 공부를 더 열심히 해야겠다...
   
+### Serializer 추가
+
+#### 1. 기존에는 Content Serializer 이외에 다른 모델의 Serializer 추가
+* Follow
+
+```python
+class FollowSerializer(serializers.ModelSerializer):
+    profile_username = serializers.SerializerMethodField()
+    followed_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = ['follower_username', 'followed_username']
+
+    def get_profile_username(self, obj):
+        return obj.profile.username
+
+    def get_followed_username(self, obj):
+        return obj.followed.username
+```
+
+* Q : Serializer fields는 무슨 기준으로 추가하는 것인지?(user를 post할 때는 password가 필요하지만, 
+  get 할 때는 필요없는 것처럼 메소드마다 필요한 필드들이 다른데...serializer는 하나로 쓰니까, 무엇을 기준으로 결정해야 합니까?)
+  
+
+### ViewSet 추가

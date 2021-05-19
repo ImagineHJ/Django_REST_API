@@ -10,18 +10,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    follower_username = serializers.SerializerMethodField()
+    profile_username = serializers.SerializerMethodField()
     followed_username = serializers.SerializerMethodField()
 
     class Meta:
-        model = Like
+        model = Follow
         fields = ['follower_username', 'followed_username']
 
-    def get_follower_username(self, obj):
+    def get_profile_username(self, obj):
         return obj.profile.username
 
     def get_followed_username(self, obj):
-        return obj.followed_user_id.username
+        return obj.followed.username
 
 
 class CommentSerializer(serializers.ModelSerializer):

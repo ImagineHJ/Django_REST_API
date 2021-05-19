@@ -29,11 +29,11 @@ class Profile(AbstractUser, Base):
 
 class Follow(Base):  # profile follows followed_user_id
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="following")
-    followed_user_id = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="followers")
+    followed = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="followers")
     # followed_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} followed {}'.format(self.profile.username, self.followed_user_id.username)
+        return '{} followed ->{}'.format(self.profile.username, self.followed.username)
 
 
 class Content(Base):
