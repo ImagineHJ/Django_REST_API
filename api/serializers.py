@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Profile, Follow, Post, Media, Comment, Like
+from .models import Profile, Follow, Content, Media, Comment, Like
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -13,10 +13,11 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['profile_username', 'text', 'create_date', 'post']
+        fields = ['profile_username', 'text', 'created_at', 'content']
 
     def get_profile_username(self, obj):
-        return obj.profile.user.username
+        return obj.profile.username
+
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -24,24 +25,24 @@ class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Like
-        fields = ['profile_username', 'like_date', 'post']
+        fields = ['profile_username', 'created_at', 'content']
 
     def get_profile_username(self, obj):
-        return obj.profile.user.username
+        return obj.profile.username
 
 
-class PostSerializer(serializers.ModelSerializer):
+class ContentSerializer(serializers.ModelSerializer):
     # nested Serializer
     comments = CommentSerializer(many=True, read_only=True)
     likes = LikeSerializer(many=True, read_only=True)
     profile_username = serializers.SerializerMethodField()
 
     class Meta:
-        model = Post
-        fields = ['id', 'profile_username', 'profile', 'media_file', 'is_video', 'text', 'create_date', 'comments', 'likes']
+        model = Content
+        fields = ['id', 'profile_username', 'profile', 'media_file', 'is_video', 'text', 'created_at', 'comments', 'likes']
 
     def get_profile_username(self, obj):
-        return obj.profile.user.username
+        return obj.profile.username
 
 
 

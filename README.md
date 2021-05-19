@@ -898,3 +898,31 @@ fields = {
   
 * filter의 필요성은 느끼고 있는데, filter set을 정확히 어떻게 정의하고 사용하는지 이해가 잘 안간다. 
   특히 공식 문서에 있는 자료만으로는 이해가 잘 안돼서 더 많이 찾아보고 공부해야함을 느꼈다.
+  
+
+## 6주차 과제 (기한: 5/22 토요일까지)
+
+### Model 변경
+
+#### 1. Base Model 추가
+  
+```python
+class Base(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+```
+* Base는 models.Model을 상속하기 때문에, 다른 custom model에서는 Base만 상속해주면 됨 
+* log 측면에서 모든 모델에 상속하는 것을 권장 
+
+#### 2. Profile은 AbstractUser 상속
+```python
+class Profile(AbstractUser, Base):
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)  # OneToOne Link with User Model
+```
+
+* https://docs.djangoproject.com/en/1.8/_modules/django/contrib/auth/models/
+  
+#### 3. Post는 REST API의 method이름이기에, Post->Content로 이름 변경 

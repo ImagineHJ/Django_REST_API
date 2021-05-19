@@ -32,7 +32,8 @@ SECRET_KEY = secrets['SECRET_KEY']  # Hide the secret key
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = 'api.Profile'
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 # Application definition
 
 INSTALLED_APPS = [

@@ -1,8 +1,8 @@
 # from django.http import JsonResponse
 # from django.views.decorators.csrf import csrf_exempt
 # from rest_framework.parsers import JSONParser
-from .models import Post
-from .serializers import PostSerializer
+from .models import Content
+from .serializers import ContentSerializer
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -92,22 +92,22 @@ class PostDetail(APIView):
 '''
 
 
-class PostFilter(FilterSet):
+class ContentFilter(FilterSet):
     video = filters.BooleanFilter(name='is_video')
-    following = filters.CharFilter(method='filter_following_posts')
+    following = filters.CharFilter(method='filter_following_contents')
 
     class Meta:
-        model = Post
+        model = Content
         fields = ['profile']
 
-    def filter_following_posts(self, queryset, name, value):
-        filtered_queryset = queryset.filter(profile__following__followers=self.request.user)
+    def filter_following_contents(self, queryset, name, value):
+        filtered_queryset = queryset.filter(profile__following__followers__username=value)
         return filtered_queryset
 
 
-class PostViewSet(viewsets.ModelViewSet):
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
+class ContentViewSet(viewsets.ModelViewSet):
+    serializer_class = ContentSerializer
+    queryset = Content.objects.all()
     filter_backends = [DjangoFilterBackend]
 
 
