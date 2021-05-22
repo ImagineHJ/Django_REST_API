@@ -954,9 +954,18 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_followed_username(self, obj):
         return obj.followed.username
 ```
+* FK로 연결된 필드는 모두 Serializer에 포함해주어야 한다. -> 아마도 FK를 정확히 지정해주어야 객체를 생성할 수 있기 때문인듯
 
+  
 * Q : Serializer fields는 무슨 기준으로 추가하는 것인지?(user를 post할 때는 password가 필요하지만, 
   get 할 때는 필요없는 것처럼 메소드마다 필요한 필드들이 다른데...serializer는 하나로 쓰니까, 무엇을 기준으로 결정해야 합니까?)
   
+* Q : Nested Serializer를 사용하는 이유는, 장점? 
+  게시글 Serializer에 comment를 추가해서 게시글 GET할 시 댓글도 조회됨
+  vs
+  게시글 GET + Comment는 필터를 통해서 따로 GET
 
 ### ViewSet 추가
+* 다른 필드의 ViewSet추가하고, router 연결
+* Q : ```GET /profile/1/content``` vs ```GET /content/?profile=1```  차이점과, 어느 방식을 많이 사용하는 지?
+

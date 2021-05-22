@@ -4,12 +4,13 @@
 # from django.http import Http404
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
-from .models import Profile, Follow, Content, Media, Comment, Like
-from .serializers import ProfileSerializer, FollowSerializer, ContentSerializer, MediaSerializer, CommentSerializer, LikeSerializer
+from .models import *
+from .serializers import *
 from rest_framework import status, viewsets
-from django_filters.rest_framework import FilterSet, filters
+from .filters import *
 from django_filters.rest_framework import DjangoFilterBackend
-# Create your views here.
+from .permissions import *
+
 '''
 # Use CVB instead of FCV
 
@@ -94,43 +95,32 @@ class PostDetail(APIView):
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
-    queryset = Content.objects.all()
+    queryset = Profile.objects.all()
 
 
-class FollowViewSet(Follow.ModelViewSet):
-    serializer_class = ProfileSerializer
-    queryset = Content.objects.all()
-
-
-class ContentFilter(FilterSet):
-    video = filters.BooleanFilter(name='is_video')
-    following = filters.CharFilter(method='filter_following_contents')
-
-    class Meta:
-        model = Content
-        fields = ['profile']
-
-    def filter_following_contents(self, queryset, name, value):
-        filtered_queryset = queryset.filter(profile__following__followers__username=value)
-        return filtered_queryset
+class FollowViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+    queryset = Follow.objects.all()
 
 
 class ContentViewSet(viewsets.ModelViewSet):
     serializer_class = ContentSerializer
     queryset = Content.objects.all()
     filter_backends = [DjangoFilterBackend]
+    filterset_class = ContentFilter
+    permission_classes = (IsOwnerOrFollowerReadonly,)
 
 
-class MediaViewSet(Follow.ModelViewSet):
+class MediaViewSet(viewsets.ModelViewSet):
     serializer_class = MediaSerializer
-    queryset = Content.objects.all()
+    queryset = Media.objects.all()
 
 
-class CommentViewSet(Follow.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    queryset = Content.objects.all()
+    queryset = Comment.objects.all()
 
 
-class LikeViewSet(Follow.ModelViewSet):
+class LikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
-    queryset = Content.objects.all()
+    queryset = Like.objects.all()

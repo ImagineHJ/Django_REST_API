@@ -14,12 +14,12 @@ urlpatterns = format_suffix_patterns(urlpatterns)
 '''
 
 router = routers.DefaultRouter()
-router.register(r'Content', ProfileViewSet)   # register()함으로써 두 개의 url 생성
-router.register(r'Content', FollowViewSet)
-router.register(r'Content', ContentViewSet)
-router.register(r'Content', MediaViewSet)
-router.register(r'Content', CommentViewSet)
-router.register(r'Content', LikeViewSet)
+router.register(r'profile', ProfileViewSet)   # register()함으로써 두 개의 url 생성
+router.register(r'follow', FollowViewSet)
+router.register(r'content', ContentViewSet)
+router.register(r'media', MediaViewSet)
+router.register(r'comment', CommentViewSet)
+router.register(r'like', LikeViewSet)
 
 
 

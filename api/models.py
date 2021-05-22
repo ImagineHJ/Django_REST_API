@@ -37,7 +37,7 @@ class Follow(Base):  # profile follows followed_user_id
 
 
 class Content(Base):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="posts")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="contents")
     # create_date = models.DateTimeField(auto_now_add=True)
     # update_date = models.DateTimeField(auto_now=True)
     text = models.TextField(max_length=500, blank=True)
@@ -45,23 +45,22 @@ class Content(Base):
     # comment_num = models.IntegerField(default=0)
     # media_num = models.IntegerField(default=1)  # at least one media
 
-
     # Add (a post requires at least one media)
-    media_file = models.FileField(upload_to="post_media")  # first/thumbnail media, save to media/post_media
+    media_file = models.FileField(upload_to="content_media")  # first/thumbnail media, save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
-        return 'post{}, {} by {}'.format(self.id, self.text, self.profile.username)
+        return 'content{}, {} by {}'.format(self.id, self.text, self.profile.username)
 
 
 class Media(Base):
     content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name="media")
     media_idx = models.IntegerField()  # idx of media in the post 2~10
-    media_file = models.FileField(upload_to="post_media")  # save to media/post_media
+    media_file = models.FileField(upload_to="content_media")  # save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
-        return '{}th media of post: {}'.format(self.media_num, self.post.text)
+        return '{}th media of content: {}'.format(self.media_num, self.post.text)
 
 
 class Comment(Base):
@@ -72,7 +71,7 @@ class Comment(Base):
     text = models.TextField(max_length=500, blank=True)
 
     def __str__(self):
-        return 'comment: {} on post{} by {}'.format(self.text, self.content.id, self.profile.username)
+        return 'comment: {} on content{} by {}'.format(self.text, self.content.id, self.profile.username)
 
 
 class Like(Base):
@@ -81,4 +80,4 @@ class Like(Base):
     # like_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return 'like on post: {} by {}'.format(self.content.id, self.profile.username)
+        return 'like on content: {} by {}'.format(self.content.id, self.profile.username)

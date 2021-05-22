@@ -34,6 +34,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'api.Profile'
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
+DEFAULT_AUTHENTICATION_CLASSES: [
+        'rest_framework.authentication.BasicAuthentication',]
+
 # Application definition
 
 INSTALLED_APPS = [

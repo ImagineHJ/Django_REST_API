@@ -6,6 +6,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         # fields = '__all__' # all fields in the model
+
         fields = ['username', 'first_name', 'last_name', 'bio', 'website', 'profile_img', 'private']
 
 
@@ -15,7 +16,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ['follower_username', 'followed_username']
+        fields = ['profile', 'profile_username', 'followed', 'followed_username']
 
     def get_profile_username(self, obj):
         return obj.profile.username
@@ -29,7 +30,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['profile_username', 'text', 'created_at', 'content']
+        fields = ['content', 'profile', 'profile_username', 'text', 'created_at']
 
     def get_profile_username(self, obj):
         return obj.profile.username
@@ -40,7 +41,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Like
-        fields = ['profile_username', 'created_at', 'content']
+        fields = ['content', 'profile', 'profile_username', 'created_at', ]
 
     def get_profile_username(self, obj):
         return obj.profile.username
@@ -49,7 +50,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
-        fields = ['media_idx', 'media_file', 'is_video']
+        fields = ['content', 'media_idx', 'media_file', 'is_video']
 
 
 class ContentSerializer(serializers.ModelSerializer):
@@ -61,7 +62,8 @@ class ContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Content
-        fields = ['id', 'profile_username', 'profile', 'media_file', 'is_video', 'text', 'created_at', 'comments', 'likes']
+        fields = ['profile', 'profile_username', 'media_file',
+                  'is_video', 'text', 'created_at', 'comments', 'likes', 'medias']
 
     def get_profile_username(self, obj):
         return obj.profile.username
