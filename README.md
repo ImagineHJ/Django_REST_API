@@ -991,7 +991,7 @@ class ExampleView(APIView):
 | AllowAny | 인증/비인증 모두 권한 부여 |
 | IsAuthenticated | 인증된 유저에게만 권한 부여 |
 | IsAdminUser | 관리자여(is_staff=True)에게만 권한 부여 |
-| IsAuthenticatedOrReadOnly | 인증된 유저에게만 권한 부여, 비인증 유저는 조회 가 |
+| IsAuthenticatedOrReadOnly | 인증된 유저에게만 권한 부여, 비인증 유저는 조회 가능 |
 
 #### <Custom Permission 만들기>
 ```python
@@ -1047,3 +1047,5 @@ class FollowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Can't follow myself")
         return data
 ```
+* POST/UPDATE 시 요청된 데이터를 deserialize해서 유효한지 검사한다-> .is_valid()
+* 이때 validation을 사용해서 데이터를 검증할 수 있음 
