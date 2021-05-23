@@ -2,6 +2,7 @@
 # models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
 
 
 class Base(models.Model):
@@ -46,7 +47,8 @@ class Content(Base):
     # media_num = models.IntegerField(default=1)  # at least one media
 
     # Add (a post requires at least one media)
-    media_file = models.FileField(upload_to="content_media")  # first/thumbnail media, save to media/post_media
+    media_file = models.FileField(upload_to="content_media",
+                                  validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'gif', 'mp4', 'mov', 'avi'])])  # first/thumbnail media, save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):
@@ -56,7 +58,8 @@ class Content(Base):
 class Media(Base):
     content = models.ForeignKey(Content, on_delete=models.CASCADE, related_name="media")
     media_idx = models.IntegerField()  # idx of media in the post 2~10
-    media_file = models.FileField(upload_to="content_media")  # save to media/post_media
+    media_file = models.FileField(upload_to="content_media",
+                                  validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'gif', 'mp4', 'mov', 'avi'])])  # save to media/post_media
     is_video = models.BooleanField()  # file can be either img or vid
 
     def __str__(self):

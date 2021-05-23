@@ -35,8 +35,12 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'api.Profile'
 DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
-DEFAULT_AUTHENTICATION_CLASSES: [
-        'rest_framework.authentication.BasicAuthentication',]
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        'rest_framework.authentication.BasicAuthentication',
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+}
 
 # Application definition
 

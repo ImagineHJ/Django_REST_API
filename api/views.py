@@ -9,7 +9,7 @@ from .serializers import *
 from rest_framework import status, viewsets
 from .filters import *
 from django_filters.rest_framework import DjangoFilterBackend
-from .permissions import *
+from .permissions import IsOwnerOrFollowerReadOnly, IsOwnerOrReadOnly
 
 '''
 # Use CVB instead of FCV
@@ -96,11 +96,13 @@ class PostDetail(APIView):
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
+    permission_classes = (IsOwnerOrReadOnly,)
 
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
     queryset = Follow.objects.all()
+    permission_classes = (IsOwnerOrReadOnly,)
 
 
 class ContentViewSet(viewsets.ModelViewSet):
@@ -108,7 +110,7 @@ class ContentViewSet(viewsets.ModelViewSet):
     queryset = Content.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = ContentFilter
-    permission_classes = (IsOwnerOrFollowerReadonly,)
+    permission_classes = (IsOwnerOrFollowerReadOnly,)
 
 
 class MediaViewSet(viewsets.ModelViewSet):
@@ -116,11 +118,14 @@ class MediaViewSet(viewsets.ModelViewSet):
     queryset = Media.objects.all()
 
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
+    permission_classes = (IsOwnerOrReadOnly,)
 
 
 class LikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
     queryset = Like.objects.all()
+    permission_classes = (IsOwnerOrReadOnly,)

@@ -925,6 +925,7 @@ class Profile(AbstractUser, Base):
 
 * Abstract User Model 참고 문서 : https://docs.djangoproject.com/en/1.8/_modules/django/contrib/auth/models/
   
+* private 필드 추가해서, 비공개 계정이면 true 아니면 false 
 #### 3. Post는 REST API의 method이름이기에, Post->Content로 이름 변경 
 * view, url, model, serializer 모두 꼼꼼히 변경
 * migration을 새로하는 과정에서, Post==Content인 것을 Django는 모르게 때문에 
@@ -969,3 +970,80 @@ class FollowSerializer(serializers.ModelSerializer):
 * 다른 필드의 ViewSet추가하고, router 연결
 * Q : ```GET /profile/1/content``` vs ```GET /content/?profile=1```  차이점과, 어느 방식을 많이 사용하는 지?
 
+### Permission
+* permission은 view함수가 시작될 때 가장 먼저 실행된다-> 권한이 있을 시에만 나머지 view 함수가 실행됨 
+* settings.py에서 디폴트 permission 설정 가능
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+```
+* view에서 지정해줄 수도 있음
+```python
+class ExampleView(APIView):
+    permission_classes = [IsAuthenticated]
+```
+
+| 종류 | 설명 |
+| --- | ----------- |
+| AllowAny | 인증/비인증 모두 권한 부여 |
+| IsAuthenticated | 인증된 유저에게만 권한 부여 |
+| IsAdminUser | 관리자여(is_staff=True)에게만 권한 부여 |
+| IsAuthenticatedOrReadOnly | 인증된 유저에게만 권한 부여, 비인증 유저는 조회 가 |
+
+#### <Custom Permission 만들기>
+```python
+class IsOwnerOrFollowerReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # permissons for readonly
+        if request.method in permissions.SAFE_METHODS:
+            # not a private account -> anyone can read
+            if not obj.profile.private:
+                return True
+            # if a private account -> followers can read
+            elif request.user.is_authenticated and Follow.objects.filter(profile=request.user,                                                      followed=obj.profile).exist():
+                return True
+            # private account and unauthenticated/non-following users can't read
+            else:
+                return False
+        return obj.profile == request.user
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.profile == request.user
+```
+* BasePermission을 상속하고, ```.has_permission(self, request, view)```,
+  ```.has_object_permission(self, request, view, obj)``` 함수를 정의해주면 됨 
+
+* SAFE_METHODS : READONLY 설정할 때 사용할 수 있는 것으로, 
+  데이터를 조회하는(변경/삭제 X) 안전한 메소드인 경우를 판단해 줌 (ex.GET, OPTIONS, HEAD)
+
+* Q : Postman에서 Basic Auth를 사용하려고 했는데, 계속 유효하지 않은 username/password라고 뜬다...
+
+### Validation
+
+1. Validator 
+```python
+from django.core.validators import FileExtensionValidator
+ media_file = models.FileField(upload_to="content_media",
+                                  validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'gif', 'mp4', 'mov', 'avi'])])
+```
+* Django에서 제공하는 ```FileExtensionValidator``` 사용
+  
+* 이미지/비디오 파일만 업로드할 수 있도록 함 (이미지/비디오의 확장자가 너무 다양해서 자주 사용하는 것들 위주로 작성)
+* 단순히 파일의 확장자로 판단하기 때문에, 파일의 내용과 확장자가 다른 경우에는 처리할 수 없다
+
+
+2. Object-level Validation
+```python
+class FollowSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        if data['profile'] == data['followed']:
+            raise serializers.ValidationError("Can't follow myself")
+        return data
+```

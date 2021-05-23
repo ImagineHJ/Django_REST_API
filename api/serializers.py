@@ -7,7 +7,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         # fields = '__all__' # all fields in the model
 
-        fields = ['username', 'first_name', 'last_name', 'bio', 'website', 'profile_img', 'private']
+        fields = ['username', 'password', 'first_name', 'last_name', 'bio', 'website', 'profile_img', 'private']
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -23,6 +23,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_followed_username(self, obj):
         return obj.followed.username
+
+    def validate(self, data):
+        if data['profile'] == data['followed']:
+            raise serializers.ValidationError("Can't follow myself")
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
