@@ -1,14 +1,8 @@
-# CEOS 13기 백엔드 스터디
-## REST API 서버 개발
-### 인스타그램 클론
 
-## 유의사항
-* 본 레포지토리는 백엔드 스터디 2-3주차의 과제를 위한 레포입니다.
-* 따라서 해당 레포를 fork 및 clone 후 local에서 본인의 깃헙 ID 브랜치로 작업한 후 커밋/푸시하고, PR 보낼 때도 `본인의 브랜치-> 본인의 브랜치`로 해야 합니다.
+## Django를 이용한 인스타그램 REST API 서버 개발
 
-## 2주차 과제 (기한: 3/25 목요일까지)
+## 2주차 : 모델링
 ### 모델 설명
-인스타그램에 대해 본인이 작성한 모델들에 대한 설명과 모델 간의 관계 등을 적어주세요!
 
 < 모델 빌딩>
 
@@ -185,9 +179,8 @@ shell에서 작성한 코드와 그 결과를 보여주세요!
 * 헷갈리는 Relation 개념에 대해 추가 공부를 한다.
 
 
-## 3주차 과제 (기한: 4/1 목요일까지)
+## 3주차 : Serializer
 ### 모델 선택 및 데이터 삽입
-선택한 모델의 구조와 데이터 삽입 후의 결과화면을 보여주세요!
 
 ```python
 class Post(models.Model):
@@ -458,7 +451,7 @@ def post_list(request):
 
 
 
-## 4주차 과제 (기한: 4/8 목요일까지)
+## 4주차 : View
 
 ### CVB
 이전 코드 DRF에서 제공하는 CVB로 수정
@@ -639,7 +632,7 @@ urlpatterns = format_suffix_patterns(urlpatterns)
 * URL: ```api/posts/```
 * Method: ```POST```
 * Body
-<img width="1234" alt="스크린샷 2021-04-07 오후 6 44 34" src="https://user-images.githubusercontent.com/57395765/113848920-ee7d1300-97d3-11eb-9f24-dd5240d588b3.png">
+<img width="1234" alt="스크린샷 2021-04-07 오후 6 44 34" src="https://user-images.githubusercontent.com/57395765/113848920-ee7d1300-97d3-11eb-9f24-dd5240d588b3.png">
 ```json
 {
     "id": 5,
@@ -659,7 +652,7 @@ urlpatterns = format_suffix_patterns(urlpatterns)
 * URL: ```api/posts/```
 * Method: ```PUT```
 * Body
-<img width="1195" alt="스크린샷 2021-04-07 오후 7 00 48" src="https://user-images.githubusercontent.com/57395765/113848935-f2a93080-97d3-11eb-85d8-5987a2a93a70.png">
+<img width="1195" alt="스크린샷 2021-04-07 오후 7 00 48" src="https://user-images.githubusercontent.com/57395765/113848935-f2a93080-97d3-11eb-85d8-5987a2a93a70.png">
 ```json
 {
     "id": 4,
@@ -756,7 +749,7 @@ Django 개발 중 view 파트가 가장 핵심적이면서도 어려운 것 같�
 
 view에서도 확실히 클래스 기반 뷰가 효율적일 것 같다. 클래스에서 함수나 변수를 정의해 이를 여러 메소드에서 사용할 수 있을 것 같다. 뷰를 더 효율적으로 작성할 수 있도록 많은 연습과 공부가 필요할 것 같다.
 
-## 6주차 과제 (기한: 5/13 목요일까지)
+## 6주차 Viewset/Filter
 
 ### 1. Viewset으로 리팩토링하기
 
@@ -900,7 +893,7 @@ fields = {
   특히 공식 문서에 있는 자료만으로는 이해가 잘 안돼서 더 많이 찾아보고 공부해야함을 느꼈다.
   
 
-## 6주차 과제 (기한: 5/22 토요일까지)
+## 7주차 : 피드백 반영 및 전체적인 프로그램 수정/Validation/Permission
 
 ### Model 변경
 
